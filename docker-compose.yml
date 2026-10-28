@@ -1,0 +1,56 @@
+# MindTrack - Postgres + Django backend + React frontend only.
+# No Celery/Redis: the only async-ish job (nightly pattern detection) runs
+# as a Django management command via the host's OS scheduler (cron /
+# Windows Task Scheduler), not an in-cluster worker - see
+# backend/apps/analytics/management/commands/detect_mood_patterns.py.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mindtrack}
+      POSTGRES_USER: ${POSTGRES_USER:-mindtrack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mindtrack}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mindtrack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: db
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

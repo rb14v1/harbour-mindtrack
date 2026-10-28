@@ -1,0 +1,18 @@
+# Python
+backend/venv/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/dev-sqlite.db
+backend/staticfiles/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Env
+.env
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
