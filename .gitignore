@@ -11,6 +11,8 @@ frontend/dist/
 
 # Env
 .env
+.env.*
+!.env.example
 
 # Editors / OS
 .vscode/
