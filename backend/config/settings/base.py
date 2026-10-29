@@ -8,7 +8,10 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config("DJANGO_SECRET_KEY", default="dev-insecure-secret-key-change-me")
+# Secrets must be supplied by the environment (injected from the secret store,
+# e.g. Azure Key Vault). No fallback defaults are provided on purpose: a missing
+# value raises at startup rather than silently running with a known credential.
+SECRET_KEY = config("DJANGO_SECRET_KEY")
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
@@ -96,7 +99,8 @@ else:
             "ENGINE": "django.db.backends.postgresql",
             "NAME": config("POSTGRES_DB", default="mindtrack"),
             "USER": config("POSTGRES_USER", default="mindtrack"),
-            "PASSWORD": config("POSTGRES_PASSWORD", default="mindtrack"),
+            # No default: must come from the environment / secret store.
+            "PASSWORD": config("POSTGRES_PASSWORD"),
             "HOST": config("POSTGRES_HOST", default="localhost"),
             "PORT": config("POSTGRES_PORT", default="5432"),
         }
