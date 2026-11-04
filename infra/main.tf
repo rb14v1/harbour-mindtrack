@@ -31,6 +31,14 @@ resource "azurerm_postgresql_flexible_server" "postgresql" {
   administrator_password = random_password.postgresql_admin.result
   public_network_access_enabled = false
 
+  # Automated backups with point-in-time restore (PITR) across the full retention window.
+  # 30 days meets the rel.backup_configured minimum; geo-redundant backup copies backups to the
+  # paired region (ukwest) so they survive a uksouth outage. NOTE: geo_redundant_backup_enabled can
+  # only be set at server creation — changing it forces recreation, so apply before go-live data
+  # exists. Restore procedure: docs/restore-runbook.md.
+  backup_retention_days        = 30
+  geo_redundant_backup_enabled = true
+
   # Azure assigns an availability zone on creation since none is declared here — a later apply
   # then sees that as drift and tries to reset it, which the provider rejects outright:
   # "zone can only be changed when exchanged with the zone specified in
