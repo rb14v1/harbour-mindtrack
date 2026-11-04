@@ -21,8 +21,9 @@ provider "azurerm" {
 
 
 resource "azurerm_postgresql_flexible_server" "postgresql" {
-  name                   = "psql-mind-test-2"
-  resource_group_name    = "mind-test-2"
+  tags = var.common_tags
+  name                   = "psql-mindtrack-harb"
+  resource_group_name    = "mindtrack-harb"
   location               = "uksouth"
   version                = "16"
   sku_name               = "B_Standard_B1ms"
@@ -30,14 +31,8 @@ resource "azurerm_postgresql_flexible_server" "postgresql" {
   administrator_login    = "psqladmin"
   administrator_password = random_password.postgresql_admin.result
   public_network_access_enabled = false
-
-  # Automated backups with point-in-time restore (PITR) across the full retention window.
-  # 30 days meets the rel.backup_configured minimum; geo-redundant backup copies backups to the
-  # paired region (ukwest) so they survive a uksouth outage. NOTE: geo_redundant_backup_enabled can
-  # only be set at server creation — changing it forces recreation, so apply before go-live data
-  # exists. Restore procedure: docs/restore-runbook.md.
-  backup_retention_days        = 30
-  geo_redundant_backup_enabled = true
+  backup_retention_days         = 35
+  geo_redundant_backup_enabled  = true
 
   # Azure assigns an availability zone on creation since none is declared here — a later apply
   # then sees that as drift and tries to reset it, which the provider rejects outright:
@@ -62,15 +57,17 @@ data "azurerm_private_dns_zone" "postgresql_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_dns_zone_link" {
-  name                  = "link-mind-test-2"
+  tags = var.common_tags
+  name                  = "link-mindtrack-harb"
   resource_group_name   = var.hub_resource_group
   private_dns_zone_name = data.azurerm_private_dns_zone.postgresql_dns_zone.name
   virtual_network_id    = var.vnet_id
 }
 
 resource "azurerm_private_endpoint" "postgresql_pe" {
-  name                = "pe-psql-mind-test-2"
-  resource_group_name = "mind-test-2"
+  tags = var.common_tags
+  name                = "pe-psql-mindtrack-harb"
+  resource_group_name = "mindtrack-harb"
   location            = "uksouth"
   subnet_id           = var.subnet_id
 
@@ -84,5 +81,51 @@ resource "azurerm_private_endpoint" "postgresql_pe" {
   private_dns_zone_group {
     name                 = "psql-dns-zone-group"
     private_dns_zone_ids = [data.azurerm_private_dns_zone.postgresql_dns_zone.id]
+  }
+}
+
+resource "azurerm_redis_cache" "redis" {
+  tags = var.common_tags
+  name                = "redis-mindtrack-harb"
+  resource_group_name = "mindtrack-harb"
+  location            = "uksouth"
+  capacity            = 0
+  family              = "C"
+  sku_name            = "Basic"
+  non_ssl_port_enabled = false
+  minimum_tls_version = "1.2"
+  public_network_access_enabled = false
+}
+
+data "azurerm_private_dns_zone" "redis_dns_zone" {
+  name                = "privatelink.redis.cache.windows.net"
+  resource_group_name = var.hub_resource_group
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "redis_dns_zone_link" {
+  tags = var.common_tags
+  name                  = "link-mindtrack-harb"
+  resource_group_name   = var.hub_resource_group
+  private_dns_zone_name = data.azurerm_private_dns_zone.redis_dns_zone.name
+  virtual_network_id    = var.vnet_id
+}
+
+resource "azurerm_private_endpoint" "redis_pe" {
+  tags = var.common_tags
+  name                = "pe-redis-mindtrack-harb"
+  resource_group_name = "mindtrack-harb"
+  location            = "uksouth"
+  subnet_id           = var.subnet_id
+
+  private_service_connection {
+    name                           = "redis-privateserviceconnection"
+    private_connection_resource_id = azurerm_redis_cache.redis.id
+    subresource_names              = ["redisCache"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "redis-dns-zone-group"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.redis_dns_zone.id]
   }
 }
