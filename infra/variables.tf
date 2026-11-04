@@ -18,3 +18,9 @@ variable "mysql_subnet_id" {
   type        = string
   default     = ""
 }
+
+variable "common_tags" {
+  description = "Tags applied to every generated azurerm_* resource (finops.resources_tagged) — the same set DEPLOY already applies imperatively to the resource group itself (attributionTags, worker/executors/deploy.ts)."
+  type        = map(string)
+  default     = {}
+}
