@@ -36,7 +36,7 @@ jobs:
       - name: Lowercase the image repository
         id: repo
         run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           build-args: ${{ matrix.component == 'frontend' && 'VITE_API_BASE_URL=https://mental-health-test-12-backend.purpleforest-6e02c0fd.uksouth.azurecontainerapps.io/api' || '' }}
           context: ${{ steps.dockerfile.outputs.context }}
