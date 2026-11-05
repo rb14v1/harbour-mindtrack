@@ -4,7 +4,7 @@
 # vulnerable releases; upper bounds keep us on the 5.2 LTS line / DRF 3.x so
 # pip resolves the newest patched release. Re-pin exactly once verified.
 Django>=5.2.12,<5.3
-djangorestframework>=3.16.2,<4
+djangorestframework>=3.18.3,<4
 djangorestframework-simplejwt==5.5.1
 psycopg2-binary==2.9.9
 django-cors-headers==4.4.0
