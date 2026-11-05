@@ -22,9 +22,9 @@ provider "azurerm" {
 
 resource "azurerm_postgresql_flexible_server" "postgresql" {
   tags = var.common_tags
-  name                   = "psql-mindtrack-harb"
-  resource_group_name    = "mindtrack-harb"
-  location               = "uksouth"
+  name                   = "psql-mental-jour-harb"
+  resource_group_name    = "mental-jour-harb"
+  location               = "UK South "
   version                = "16"
   sku_name               = "B_Standard_B1ms"
   storage_mb             = 32768
@@ -58,7 +58,7 @@ data "azurerm_private_dns_zone" "postgresql_dns_zone" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_dns_zone_link" {
   tags = var.common_tags
-  name                  = "link-mindtrack-harb"
+  name                  = "link-mental-jour-harb"
   resource_group_name   = var.hub_resource_group
   private_dns_zone_name = data.azurerm_private_dns_zone.postgresql_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -66,9 +66,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_dns_zone_li
 
 resource "azurerm_private_endpoint" "postgresql_pe" {
   tags = var.common_tags
-  name                = "pe-psql-mindtrack-harb"
-  resource_group_name = "mindtrack-harb"
-  location            = "uksouth"
+  name                = "pe-psql-mental-jour-harb"
+  resource_group_name = "mental-jour-harb"
+  location            = "UK South "
   subnet_id           = var.subnet_id
 
   private_service_connection {
@@ -86,9 +86,9 @@ resource "azurerm_private_endpoint" "postgresql_pe" {
 
 resource "azurerm_redis_cache" "redis" {
   tags = var.common_tags
-  name                = "redis-mindtrack-harb"
-  resource_group_name = "mindtrack-harb"
-  location            = "uksouth"
+  name                = "redis-mental-jour-harb"
+  resource_group_name = "mental-jour-harb"
+  location            = "UK South "
   capacity            = 0
   family              = "C"
   sku_name            = "Basic"
@@ -104,7 +104,7 @@ data "azurerm_private_dns_zone" "redis_dns_zone" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "redis_dns_zone_link" {
   tags = var.common_tags
-  name                  = "link-mindtrack-harb"
+  name                  = "link-mental-jour-harb"
   resource_group_name   = var.hub_resource_group
   private_dns_zone_name = data.azurerm_private_dns_zone.redis_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -112,9 +112,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "redis_dns_zone_link" {
 
 resource "azurerm_private_endpoint" "redis_pe" {
   tags = var.common_tags
-  name                = "pe-redis-mindtrack-harb"
-  resource_group_name = "mindtrack-harb"
-  location            = "uksouth"
+  name                = "pe-redis-mental-jour-harb"
+  resource_group_name = "mental-jour-harb"
+  location            = "UK South "
   subnet_id           = var.subnet_id
 
   private_service_connection {
