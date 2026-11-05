@@ -22,8 +22,8 @@ provider "azurerm" {
 
 resource "azurerm_postgresql_flexible_server" "postgresql" {
   tags = var.common_tags
-  name                   = "psql-mental-jour-harb"
-  resource_group_name    = "mental-jour-harb"
+  name                   = "psql-mental-health-test-10"
+  resource_group_name    = "mental-health-test-10"
   location               = "UK South "
   version                = "16"
   sku_name               = "B_Standard_B1ms"
@@ -58,7 +58,7 @@ data "azurerm_private_dns_zone" "postgresql_dns_zone" {
 
 resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_dns_zone_link" {
   tags = var.common_tags
-  name                  = "link-mental-jour-harb"
+  name                  = "link-mental-health-test-10"
   resource_group_name   = var.hub_resource_group
   private_dns_zone_name = data.azurerm_private_dns_zone.postgresql_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -66,8 +66,8 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_dns_zone_li
 
 resource "azurerm_private_endpoint" "postgresql_pe" {
   tags = var.common_tags
-  name                = "pe-psql-mental-jour-harb"
-  resource_group_name = "mental-jour-harb"
+  name                = "pe-psql-mental-health-test-10"
+  resource_group_name = "mental-health-test-10"
   location            = "UK South "
   subnet_id           = var.subnet_id
 
@@ -81,51 +81,5 @@ resource "azurerm_private_endpoint" "postgresql_pe" {
   private_dns_zone_group {
     name                 = "psql-dns-zone-group"
     private_dns_zone_ids = [data.azurerm_private_dns_zone.postgresql_dns_zone.id]
-  }
-}
-
-resource "azurerm_redis_cache" "redis" {
-  tags = var.common_tags
-  name                = "redis-mental-jour-harb"
-  resource_group_name = "mental-jour-harb"
-  location            = "UK South "
-  capacity            = 0
-  family              = "C"
-  sku_name            = "Basic"
-  non_ssl_port_enabled = false
-  minimum_tls_version = "1.2"
-  public_network_access_enabled = false
-}
-
-data "azurerm_private_dns_zone" "redis_dns_zone" {
-  name                = "privatelink.redis.cache.windows.net"
-  resource_group_name = var.hub_resource_group
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "redis_dns_zone_link" {
-  tags = var.common_tags
-  name                  = "link-mental-jour-harb"
-  resource_group_name   = var.hub_resource_group
-  private_dns_zone_name = data.azurerm_private_dns_zone.redis_dns_zone.name
-  virtual_network_id    = var.vnet_id
-}
-
-resource "azurerm_private_endpoint" "redis_pe" {
-  tags = var.common_tags
-  name                = "pe-redis-mental-jour-harb"
-  resource_group_name = "mental-jour-harb"
-  location            = "UK South "
-  subnet_id           = var.subnet_id
-
-  private_service_connection {
-    name                           = "redis-privateserviceconnection"
-    private_connection_resource_id = azurerm_redis_cache.redis.id
-    subresource_names              = ["redisCache"]
-    is_manual_connection           = false
-  }
-
-  private_dns_zone_group {
-    name                 = "redis-dns-zone-group"
-    private_dns_zone_ids = [data.azurerm_private_dns_zone.redis_dns_zone.id]
   }
 }
