@@ -24,8 +24,3 @@ output "postgresql_password" {
   value     = random_password.postgresql_admin.result
   sensitive = true
 }
-
-output "redis_cache_connection" {
-  value     = "${azurerm_redis_cache.redis.hostname}:${azurerm_redis_cache.redis.ssl_port},password=${azurerm_redis_cache.redis.primary_access_key},ssl=True"
-  sensitive = true
-}
